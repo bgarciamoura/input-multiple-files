@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body,
+            .card,
+            .img-holder {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            body {
+                padding: 24px;
+            }
+
+            .card {
+                padding: 24px 0;
+                background-color: cornflowerblue;
+
+                transition: all ease-in-out 0.3s;
+            }
+
+            .card:hover {
+                transform: scale(1.1);
+                box-shadow: 0px 2px 6px 1px rgba(100, 149, 237, 0.5);
+            }
+
+            .img-holder {
+                height: 350px;
+            }
+
+            .img-holder img {
+                width: 100%;
+                height: 100%;
+            }
+
+            button {
+                margin-top: 10px;
+                padding: 8px 22px;
+                color: white;
+                background-color: rgba(255, 0, 0, 1);
+                outline: none;
+                border: none;
+
+                transition: all ease-in-out 0.3s;
+            }
+
+            button:hover {
+                background-color: rgba(200, 0, 0, 1);
+                box-shadow: 0px 2px 4px rgba(200, 0, 0, 0.2);
+            }
+        </style>
+    </head>
+    <body>
+        <form action="" method="POST" enctype="multipart/form-data" id="form">
+            <label for="file">Teste</label>
+            <input type="file" name="file[]" id="file" multiple />
+            <button type="submit">Send</button>
+        </form>
+
+        <ul id="items"></ul>
+
+        <script>
+            var fullList = [];
+
+            (function () {
+                var fileCatcher = document.getElementById('form');
+                var fileInput = document.getElementById('file');
+                var fileListDisplay = document.getElementById('items');
+
+                var fileList,
+                    tempArr = [];
+
+                var renderFileList;
+
+                fileInput.addEventListener('change', function (evnt) {
+                    fileList = [];
+
+                    for (var i = 0; i < fileInput.files.length; i++) {
+                        fileList.push(fileInput.files[i]);
+                    }
+
+                    var len = fileList.length;
+                    tempArr = fileList;
+
+                    for (let i = 0; i < fullList.length; i++) {
+                        for (let j = 0; j < len; j++) {
+                            if (fullList[i].name === fileList[j].name) {
+                                tempArr.pop(j, 1);
+                            }
+                        }
+                    }
+
+                    fileList = tempArr;
+                    fullList.push(...fileList);
+
+                    evnt.target.files = new FileListItems(fullList);
+                    renderFileList();
+                });
+
+                renderFileList = function () {
+                    fileListDisplay.innerHTML = '';
+                    fullList.forEach(function (file, index) {
+                        var fileDisplayEl = document.createElement('li');
+                        var fileRemoveButton = "<button onclick='removeLi(this)'>Remover</button>";
+                        fileDisplayEl.innerHTML = file.name + fileRemoveButton;
+                        fileListDisplay.appendChild(fileDisplayEl);
+                    });
+                };
+            })();
+
+            /**
+             * @params {File[]} files Array of files to add to the FileList
+             * @return {FileList}
+             */
+            function FileListItems(files) {
+                var b = new ClipboardEvent('').clipboardData || new DataTransfer();
+                for (var i = 0, len = files.length; i < len; i++) {
+                    b.items.add(files[i]);
+                }
+                return b.files;
+            }
+
+            function removeLi(e) {
+                const fileInput = document.getElementById('file');
+                const listItemName = e.parentNode.firstChild.data;
+
+                fullList = fullList.filter(function (file) {
+                    return file.name !== listItemName;
+                });
+                fileInput.files = new FileListItems(fullList);
+                e.parentNode.parentNode.removeChild(e.parentNode);
+            }
+        </script>
+    </body>
+</html>
